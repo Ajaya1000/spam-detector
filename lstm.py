@@ -13,12 +13,13 @@ Created on Tue Jan 26 08:37:43 2021
 import numpy as np
 import pandas as pd
 import string
+from matplotlib import pyplot
 
 dataset = pd.read_csv('dataset/data.csv')
 tempo = np.array(dataset[['text','label_num']])
 
 X = np.array(tempo[:,0])
-y = np.array(tempo[:,-1])
+y = np.array(tempo[:,-1]).astype('float32')
 
 #lower case
 #removing Punctuation
@@ -53,7 +54,7 @@ X_test, X_valid, y_test, y_valid = tts(X_test, y_test, test_size=0.5, random_sta
 #Defining Model
 
 import tensorflow as tf
-from tensorflow.keras.layers import Dense,LSTM, Embedding, Dropout, Activation, Bidirectional
+from tensorflow.keras.layers import Dense,LSTM, Embedding, Dropout, Bidirectional
 #size of the output vector from each layer
 embedding_vector_length = 32
 #Creating a sequential model
@@ -61,7 +62,7 @@ model = tf.keras.Sequential()
 #Creating an embedding layer to vectorize
 model.add(Embedding(max_feature, embedding_vector_length, input_length=max_len))
 #Addding Bi-directional LSTM
-model.add(Bidirectional(tf.keras.layers.LSTM(64)))
+model.add(Bidirectional(LSTM(64)))
 #Relu allows converging quickly and allows backpropagation
 model.add(Dense(16, activation='relu'))
 #Deep Learninng models can be overfit easily, to avoid this, we add randomization using drop out
@@ -74,8 +75,8 @@ print(model.summary())
 
 
 
-history = model.fit(X_train,y_train,batch_size = 512,epochs=20,validation_data=(X_valid,y_valid))
-
+history = model.fit(X_train,y_train,batch_size = 100,epochs=5,validation_data=(X_valid,y_valid))
+model.save('my_model')
 
 
 
